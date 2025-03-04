@@ -113,6 +113,9 @@ def user_action():
 def home():
     return "Hello, ORSA! This is the root endpoint."
 
+import os
+print("MONGO_URI from environment:", os.getenv("MONGO_URI"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
