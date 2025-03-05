@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from database import user_profiles #MongoDBコレクションをインポート
+from backend.database import user_profiles #MongoDBコレクションをインポート
 from pymongo import MongoClient
 from datetime import datetime
 from bson import ObjectId
