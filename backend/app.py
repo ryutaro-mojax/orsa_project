@@ -171,6 +171,7 @@ def create_user_profile():
         return jsonify({"message": "User profile saved", "id": str(result.inserted_id)}), 201
 
     except Exception as e:
+        app.logger.error(f"ユーザープロフィール作成時のエラー: {e}")  # Flaskのログに記録
         return jsonify({"error": str(e)}), 500
 
 # ✅ ユーザープロフィールを取得するAPI
