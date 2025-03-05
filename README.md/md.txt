@@ -1,0 +1,11 @@
+# ORSA_Project
+このプロジェクトは ORSA システムのバックエンドを開発するためのものです。
+
+## セットアップ方法
+```bash
+git clone https://github.com/yourusername/ORSA_Project.git
+cd ORSA_Project
+python -m venv venv
+source venv/bin/activate  # Windowsなら venv\Scripts\activate
+pip install -r requirements.txt
+python backend/app.py

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from database import user_profiles #MongoDBコレクションをインポート
 from pymongo import MongoClient
 from datetime import datetime
 from bson import ObjectId
@@ -143,6 +144,57 @@ def home():
     return "Hello, ORSA! This is the root endpoint."
 
 print("MONGO_URI from environment:", os.getenv("MONGO_URI"))
+
+# ✅ ユーザープロフィールを登録するAPI
+@app.route("/orsa/user_profile", methods=["POST"])
+def create_user_profile():
+    try:
+        data = request.json  # 送信データを取得
+        user_id = data.get("user_id")
+        
+        # 必須フィールドチェック
+        if not user_id:
+            return jsonify({"error": "user_id is required"}), 400
+
+        # 保存データを作成
+        user_data = {
+            "user_id": user_id,
+            "name": data.get("name", ""),
+            "personality": data.get("personality", {}),
+            "bazi_analysis": data.get("bazi_analysis", {}),
+            "additional_analysis": data.get("additional_analysis", {}),
+            "last_updated": datetime.datetime.utcnow().isoformat()
+        }
+
+        # MongoDB に保存
+        result = user_profiles.insert_one(user_data)
+        return jsonify({"message": "User profile saved", "id": str(result.inserted_id)}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ✅ ユーザープロフィールを取得するAPI
+@app.route("/user_profile/<user_id>", methods=["GET"])
+def get_user_profile(user_id):
+    try:
+        user_data = user_profiles.find_one({"user_id": user_id})
+        
+        if not user_data:
+            return jsonify({"error": "User not found"}), 404
+
+        # ObjectId を文字列に変換
+        user_data["_id"] = str(user_data["_id"])
+
+        return jsonify(user_data), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ✅ ルート一覧をログに出力（追加する部分）
+print("Registered Routes:")
+for rule in app.url_map.iter_rules():
+    print(rule)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
