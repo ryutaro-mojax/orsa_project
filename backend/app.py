@@ -146,7 +146,7 @@ def home():
 print("MONGO_URI from environment:", os.getenv("MONGO_URI"))
 
 # ✅ ユーザープロフィールを登録するAPI
-@app.route("/orsa/user_profile", methods=["POST"])
+@app.route("/orsa/user_profile", methods=["POST","GET"])
 def create_user_profile():
     try:
         data = request.json  # 送信データを取得
