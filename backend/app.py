@@ -72,7 +72,7 @@ def update_log(log_id):
     except:
         return jsonify({"error": "log_id の形式が無効です"}), 400
 
-    data = request.json
+    data = request.get_json(force-True) #強制的にJSONとして扱う
     if not data:
         return jsonify({"error": "リクエストボディが空です"}), 400
 
@@ -146,12 +146,15 @@ def home():
 print("MONGO_URI from environment:", os.getenv("MONGO_URI"))
 
 # ✅ ユーザープロフィールを登録するAPI
-@app.route("/orsa/user_profile", methods=["POST","GET"])
+@app.route("/orsa/user_profile", methods=["POST", "GET"])
 def create_user_profile():
     try:
         data = request.json  # 送信データを取得
-        user_id = data.get("user_id")
+        if not data:
+            return jsonify({"error": "Request body is empty"}), 400
         
+        user_id = data.get("user_id")
+
         # 必須フィールドチェック
         if not user_id:
             return jsonify({"error": "user_id is required"}), 400
@@ -163,7 +166,7 @@ def create_user_profile():
             "personality": data.get("personality", {}),
             "bazi_analysis": data.get("bazi_analysis", {}),
             "additional_analysis": data.get("additional_analysis", {}),
-            "last_updated": datetime.datetime.utcnow().isoformat()
+            "last_updated": datetime.utcnow().isoformat()
         }
 
         # MongoDB に保存
@@ -171,8 +174,9 @@ def create_user_profile():
         return jsonify({"message": "User profile saved", "id": str(result.inserted_id)}), 201
 
     except Exception as e:
-        app.logger.error(f"ユーザープロフィール作成時のエラー: {e}")  # Flaskのログに記録
+        print(f"❌ エラー発生: {str(e)}")  # コンソールにエラー詳細を出力
         return jsonify({"error": str(e)}), 500
+
 
 # ✅ ユーザープロフィールを取得するAPI
 @app.route("/user_profile/<user_id>", methods=["GET"])
