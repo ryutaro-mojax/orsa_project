@@ -146,20 +146,27 @@ def home():
 print("MONGO_URI from environment:", os.getenv("MONGO_URI"))
 
 # ✅ ユーザープロフィールを登録するAPI
+import traceback  # エラー詳細を取得するため
+
 @app.route("/orsa/user_profile", methods=["POST", "GET"])
 def create_user_profile():
     try:
-        data = request.json  # 送信データを取得
+        print("✅ ユーザープロフィール作成リクエスト受信")
+        print("リクエストヘッダー:", request.headers)
+        print("リクエストボディ:", request.get_data(as_text=True))  # 受信したデータをそのまま表示
+
+        # JSONとしてパース
+        data = request.json
         if not data:
+            print("❌ エラー: リクエストボディが空です")
             return jsonify({"error": "Request body is empty"}), 400
-        
+
         user_id = data.get("user_id")
 
-        # 必須フィールドチェック
         if not user_id:
+            print("❌ エラー: user_id がありません")
             return jsonify({"error": "user_id is required"}), 400
 
-        # 保存データを作成
         user_data = {
             "user_id": user_id,
             "name": data.get("name", ""),
@@ -169,13 +176,15 @@ def create_user_profile():
             "last_updated": datetime.utcnow().isoformat()
         }
 
-        # MongoDB に保存
         result = user_profiles.insert_one(user_data)
+        print("✅ ユーザープロフィール作成成功:", result.inserted_id)
+
         return jsonify({"message": "User profile saved", "id": str(result.inserted_id)}), 201
 
     except Exception as e:
-        print(f"❌ エラー発生: {str(e)}")  # コンソールにエラー詳細を出力
-        return jsonify({"error": str(e)}), 500
+        error_msg = traceback.format_exc()
+        print(f"❌ サーバーエラー発生: {error_msg}")  # 例外の詳細を出力
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
 
 # ✅ ユーザープロフィールを取得するAPI
