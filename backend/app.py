@@ -5,7 +5,7 @@ from datetime import datetime
 from bson import ObjectId
 import os
 from dotenv import load_dotenv  # dotenv をインポート
-from authlib.integrations.flask_client import OAuth  # Google OAuthのライブラリ
+from authlib.integrations.flask_client import OAuth as AuthLibOAuth # Google OAuthのライブラリ
 from flask import redirect, url_for, session
 
 
