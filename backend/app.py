@@ -5,7 +5,7 @@ from datetime import datetime
 from bson import ObjectId
 import os
 from dotenv import load_dotenv  # dotenv をインポート
-from authlib.integrations.flask_client import OAuth as AuthLibOAuth # Google OAuthのライブラリ
+from authlib.integrations.flask_client import OAuth # Google OAuthのライブラリ
 from flask import redirect, url_for, session
 
 
@@ -31,7 +31,7 @@ oauth.register(
     access_token_url="https://oauth2.googleapis.com/token",
     access_token_params=None,
     refresh_token_url=None,
-    redirect_uri="http://localhost:5000/callback",
+    redirect_uri="http://orsa-project.onrender.com/callback",
     client_kwargs={"scope": "openid email profile"},
 )
 
