@@ -5,10 +5,37 @@ from datetime import datetime
 from bson import ObjectId
 import os
 from dotenv import load_dotenv  # dotenv をインポート
+from authlib.integrations.flask_client import OAuth  # Google OAuthのライブラリ
+from flask import redirect, url_for, session
+
 
 load_dotenv()  # .env ファイルをロード
 
+# Flaskアプリの作成
 app = Flask(__name__)
+
+# SECRET_KEY を環境変数から取得して設定
+# Google OAuth 設定
+oauth = OAuth(app)
+
+app.config["GOOGLE_CLIENT_ID"] = os.getenv("GOOGLE_CLIENT_ID")
+app.config["GOOGLE_CLIENT_SECRET"] = os.getenv("GOOGLE_CLIENT_SECRET")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")  # すでに追加済み
+
+oauth.register(
+    "google",
+    client_id=app.config["GOOGLE_CLIENT_ID"],
+    client_secret=app.config["GOOGLE_CLIENT_SECRET"],
+    authorize_url="https://accounts.google.com/o/oauth2/auth",
+    authorize_params=None,
+    access_token_url="https://oauth2.googleapis.com/token",
+    access_token_params=None,
+    refresh_token_url=None,
+    redirect_uri="http://localhost:5000/callback",
+    client_kwargs={"scope": "openid email profile"},
+)
+
+
 
 # 設定の読み込みと関数化
 def get_mongo_client():
@@ -185,6 +212,24 @@ def create_user_profile():
         error_msg = traceback.format_exc()
         print(f"❌ サーバーエラー発生: {error_msg}")  # 例外の詳細を出力
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
+
+# Google OAuth ログインエンドポイント
+@app.route("/login")
+def login():
+    redirect_uri = url_for("callback", _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+# Google OAuth コールバックエンドポイント
+@app.route("/callback")
+def callback():
+    token = oauth.google.authorize_access_token()
+    user_info = oauth.google.parse_id_token(token)
+    
+    # セッションに保存
+    session["user"] = user_info
+
+    return redirect(url_for("dashboard"))  # ログイン後の画面へリダイレクト
 
 
 # ✅ ユーザープロフィールを取得するAPI
