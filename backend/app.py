@@ -101,7 +101,7 @@ def update_log(log_id):
     except:
         return jsonify({"error": "log_id の形式が無効です"}), 400
 
-    data = request.get_json(force-True) #強制的にJSONとして扱う
+    data = request.get_json(force=True) #強制的にJSONとして扱う
     if not data:
         return jsonify({"error": "リクエストボディが空です"}), 400
 
@@ -276,8 +276,8 @@ def save_chat():
         analysis=analyze_personality(conversation)
 
             # 2️⃣ ユーザーの生年月日を取得して四柱推命を計算
-         user = user_profiles.find_one({"user_id": user_id})
-　　　　if not user：
+        user = user_profiles.find_one({"user_id": user_id})
+　　　　if not user:
     　　　　return jsonify({"error": "User not found"}), 404
 
 　　　　birth_date = user.get("birth_date")
@@ -294,6 +294,7 @@ def save_chat():
         　　　　"four_pillars": bazi_analysis
     　　　　}
 　　　　}
+
 　　　　chat_history.insert_one(chat_entry)
 　　　　return jsonify({"message": "Chat saved", "analysis": chat_entry["analysis"]}), 201
 
